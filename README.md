@@ -1,14 +1,13 @@
-
 ````md
-# Thundera's Eye
+# Eye of Thundera
 
-Thundera's Eye é um laboratório prático de observabilidade e monitoramento criado para estudar conceitos de DevOps e SRE de forma aplicada.
+Eye of Thundera é um laboratório prático de observabilidade e monitoramento criado para estudar conceitos de DevOps e SRE de forma aplicada.
 
 O projeto simula uma aplicação que pode apresentar falhas controladas, lentidão e degradação de saúde, enquanto um serviço separado monitora esse comportamento, detecta incidentes automaticamente e envia alertas em tempo real para o Telegram.
 
 ## Objetivo
 
-A ideia deste projeto é demonstrar, na prática, como funciona um fluxo básico de monitoramento operacional, cobrindo pontos importantes como:
+A proposta deste projeto é demonstrar, na prática, como funciona um fluxo básico de monitoramento operacional, cobrindo pontos importantes como:
 
 - health checks automáticos
 - detecção de incidentes
@@ -27,20 +26,20 @@ O projeto foi dividido em serviços com responsabilidades separadas:
 - `prometheus`: coleta métricas da aplicação
 - `grafana`: visualiza métricas coletadas pelo Prometheus
 
-Fluxo simplificado:
+### Fluxo simplificado
 
-1. a aplicação principal expõe endpoints como `/health` e `/metrics`
-2. o `ops-api` verifica periodicamente a saúde da aplicação
-3. quando detecta falha, abre um incidente automaticamente
-4. o incidente é classificado por severidade
-5. um alerta é enviado para o Telegram
-6. quando o serviço volta ao normal, o incidente é resolvido e uma nova mensagem é enviada
-7. o Prometheus coleta métricas da aplicação e o Grafana pode exibi-las em dashboards
+1. A aplicação principal expõe endpoints como `/health` e `/metrics`
+2. O `ops-api` verifica periodicamente a saúde da aplicação
+3. Quando detecta falha, abre um incidente automaticamente
+4. O incidente é classificado por severidade
+5. Um alerta é enviado para o Telegram
+6. Quando o serviço volta ao normal, o incidente é resolvido e uma nova mensagem é enviada
+7. O Prometheus coleta métricas da aplicação e o Grafana pode exibi-las em dashboards
 
 ## Estrutura do projeto
 
 ```bash
-sre-playground/
+eye-of-thundera/
 ├── app/
 │   ├── Dockerfile
 │   ├── main.py
@@ -52,7 +51,10 @@ sre-playground/
 ├── ops-web/
 ├── prometheus/
 │   └── prometheus.yml
-└── docker-compose.yml
+├── .env.example
+├── .gitignore
+├── docker-compose.yml
+└── README.md
 ````
 
 ## Tecnologias utilizadas
@@ -72,7 +74,7 @@ sre-playground/
 
 A aplicação principal foi construída para servir como alvo do monitoramento. Ela permite simular comportamentos comuns em ambientes reais.
 
-Endpoints principais da aplicação:
+#### Endpoints principais da aplicação
 
 * `GET /` → resposta simples indicando que a aplicação está no ar
 * `GET /health` → health check principal
@@ -106,7 +108,7 @@ Quando o serviço volta ao normal, esse incidente é resolvido automaticamente.
 
 ### Severidade
 
-Os incidentes também recebem severidade para diferenciar impacto operacional:
+Os incidentes também recebem severidade para diferenciar o impacto operacional:
 
 * `warning` para estados `unhealthy`
 * `critical` para estados `down`
@@ -137,12 +139,12 @@ Também é necessário ter um bot do Telegram criado no `@BotFather` caso queira
 
 ## Configuração do Telegram
 
-No serviço `ops-api`, o envio de alertas depende de duas variáveis:
+No serviço `ops-api`, o envio de alertas depende de duas variáveis de ambiente:
 
 * `TELEGRAM_BOT_TOKEN`
 * `TELEGRAM_CHAT_ID`
 
-Exemplo de configuração no `docker-compose.yml`:
+### Exemplo de configuração no `docker-compose.yml`
 
 ```yaml
 ops-api:
@@ -152,8 +154,15 @@ ops-api:
   depends_on:
     - app
   environment:
-    TELEGRAM_BOT_TOKEN: "SEU_TOKEN_AQUI"
-    TELEGRAM_CHAT_ID: "SEU_CHAT_ID_AQUI"
+    TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN}"
+    TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID}"
+```
+
+### Exemplo de `.env.example`
+
+```env
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+TELEGRAM_CHAT_ID=your_telegram_chat_id_here
 ```
 
 ## Subindo os serviços
@@ -225,6 +234,20 @@ curl -X POST http://localhost:8000/reset
 
 Após alguns segundos, o incidente deve ser resolvido automaticamente e uma nova mensagem deve ser enviada ao Telegram.
 
+## Observação para Windows PowerShell
+
+No PowerShell, o comando `curl` pode se comportar de forma diferente. Nesse caso, você pode usar:
+
+```powershell
+irm -Method POST -Uri http://localhost:8000/toggle-health
+```
+
+e para consultar status:
+
+```powershell
+irm http://localhost:8001/status
+```
+
 ## Exemplos de uso
 
 Alguns cenários que podem ser simulados com o projeto:
@@ -261,7 +284,6 @@ Este projeto foi construído como laboratório de estudo e MVP técnico. Por iss
 * ainda não há autenticação
 * o frontend `ops-web` ainda não foi implementado
 
-
 ## Próximos passos
 
 Algumas evoluções planejadas para o projeto:
@@ -290,4 +312,3 @@ Este projeto foi desenvolvido com foco em estudo prático e portfólio, buscando
 Desenvolvido por João Artur como projeto prático de estudos em DevOps/SRE.
 
 ```
-
